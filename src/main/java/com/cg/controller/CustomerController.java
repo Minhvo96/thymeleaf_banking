@@ -153,15 +153,17 @@ public class CustomerController {
         List<Customer> customerList = new ArrayList<>(customerAll);
         customerList.remove(customer);
 
-        customer.setTransfer(new Transfer(BigDecimal.valueOf(10L)));
+        Transfer transfer = new Transfer();
+        transfer.setSender(customer);
+        transfer.setFee(BigDecimal.valueOf(10));
 
-        model.addAttribute("customer", customer);
+        model.addAttribute("transfer", transfer);
         model.addAttribute("customerList", customerList);
 
         return "/customer/transfer";
     }
     @PostMapping("/transfer/{id}")
-    public String transfer(@ModelAttribute Customer customer, Model model, @PathVariable Long id) {
+    public String transfer(@ModelAttribute Transfer transfer, Model model, @PathVariable Long id) {
         Customer customerTransfer = customerService.findById(id);
         List<Customer> customerAll = customerService.findAll();
 
@@ -170,17 +172,20 @@ public class CustomerController {
         customerList.remove(customerTransfer);
         model.addAttribute("customerList", customerList);
 
-        customerServiceImp.transfer(id, new BigDecimal(customer.getTransfer().getTransferAmount()), customer);
+        customerServiceImp.transfer(transfer);
+
+
         model.addAttribute("success", true);
         model.addAttribute("message", "Transfer completed");
-        model.addAttribute("customer", customerTransfer);
+        model.addAttribute("transfer", transfer);
 
         return "/customer/transfer";
     }
     @GetMapping("/histories")
     public String transferHistories(Model model) {
+        List<Transfer> historylist = customerServiceImp.showHistories();
 
-
+        model.addAttribute("historyList", historylist);
 
         return "customer/histories";
     }

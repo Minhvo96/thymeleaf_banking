@@ -15,10 +15,10 @@
             <i class="fas fa-history"></i>
             Transfer histories
           </button>
-          <a href="/customers/create">
+          <a href="/customers">
             <button class="btn btn-outline-light" type="button">
               <i class="far fa-plus-square"></i>
-              Add new customer
+              List customers
             </button>
           </a>
         </div>
@@ -30,26 +30,23 @@
     <table class="table table-hover">
       <thead>
       <tr>
-        <th>#</th>
         <th>Sender Name</th>
         <th>Recipient Name</th>
         <th>Transfer Money ($)</th>
         <th>Fee ($)</th>
         <th>Total Transfer Money</th>
-        <th colspan="5">Action</th>
       </tr>
       </thead>
       <tbody>
-<!--      <th:block th:each="item : ${customers}">-->
-<!--        <tr>-->
-<!--          <td th:text="${item.id}"></td>-->
-<!--          <td th:text="${item.fullName}"></td>-->
-<!--          <td th:text="${item.email}"></td>-->
-<!--          <td th:text="${item.phone}"></td>-->
-<!--          <td th:text="${item.address}"></td>-->
-<!--          <td th:text="${item.balance}"></td>-->
-<!--        </tr>-->
-<!--      </th:block>-->
+      <th:block th:each="item : ${historyList}">
+        <tr>
+          <td th:text="${item.sender.fullName}"></td>
+          <td th:text="${item.recipient.fullName}"></td>
+          <td th:text="${item.transferAmount}"></td>
+          <td th:text="${item.fee}"></td>
+          <td th:text="${item.total}"></td>
+        </tr>
+      </th:block>
       </tbody>
     </table>
   </div>

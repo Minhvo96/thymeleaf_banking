@@ -23,29 +23,29 @@
   </header>
 
   <div class="content">
-    <form th:object="${customer}" method="post">
+    <form th:object="${transfer}" method="post">
       <div class="row mb-3 mt-3">
         <div class="col-lg-3">
           <label for="id" class="form-label">Sender ID</label>
-          <input class="form-control" id="id" th:field="*{id}" readonly>
+          <input class="form-control" id="id" th:field="*{sender.id}" readonly>
         </div>
         <div class="col-lg-3">
           <label for="fullName" class="form-label">Sender Name</label>
-          <input type="text" class="form-control" id="fullName" th:field="*{fullName}" readonly>
+          <input type="text" class="form-control" id="fullName" th:field="*{sender.fullName}" readonly>
         </div>
         <div class="col-lg-3">
           <label for="email" class="form-label">Email</label>
-          <input type="text" class="form-control" id="email" th:field="*{email}" readonly>
+          <input type="text" class="form-control" id="email" th:field="*{sender.email}" readonly>
         </div>
         <div class="col-lg-3">
           <label for="balance" class="form-label">Sender Balance</label>
-          <input type="text" class="form-control" id="balance" th:field="*{balance}" readonly>
+          <input type="text" class="form-control" id="balance" th:field="*{sender.balance}" readonly>
         </div>
       </div>
       <div class="row mb-3">
         <div class="col-lg-3">
           <label class="form-label">Recipient Name</label>
-          <select class="form-control" th:field="${customer.transfer.recipient}">
+          <select class="form-control" th:field="${transfer.recipient.id}">
             <option th:each="item : ${customerList}"
                     th:text="${'(' + item.id + ') ' + item.fullName}"
                     th:value="${item.id}">
@@ -54,15 +54,15 @@
         </div>
         <div class="col-lg-3">
           <label class="form-label">Transfer Amount ($)</label>
-          <input type="text" class="form-control" id="transferAmount" th:field="${customer.transfer.transferAmount}">
+          <input type="text" class="form-control" id="transferAmount" th:field="${transfer.transferAmount}">
         </div>
         <div class="col-lg-3">
           <label class="form-label">Fees ($)</label>
-          <input type="text" class="form-control" id="fee" th:field="${customer.transfer.fee}" readonly>
+          <input type="text" class="form-control" id="fee" th:field="${transfer.fee}" readonly>
         </div>
         <div class="col-lg-3">
           <label class="form-label">Total Amount of Transaction ($)</label>
-          <input type="text" class="form-control" id="totalAmount" th:field="${customer.transfer.total}" readonly>
+          <input type="text" class="form-control" id="totalAmount" th:field="${transfer.total}" readonly>
         </div>
       </div>
 

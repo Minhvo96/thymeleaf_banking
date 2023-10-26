@@ -7,11 +7,14 @@ import com.cg.model.Withdraw;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class CustomerServiceImpl implements ICustomerService {
 
     private static final List<Customer> customers = new ArrayList<>();
     private static long id = 1L;
+    private static final List<Transfer> histories = new ArrayList<>();
 
     static {
         customers.add(new Customer(id++, "NVA", "nva@co.cc", "2345", "28 Nguyễn Tri Phương", BigDecimal.valueOf(10000), false));
@@ -32,6 +35,10 @@ public class CustomerServiceImpl implements ICustomerService {
             }
         }
         return null;
+    }
+
+    public List<Customer> findAllWithoutId(Long id) {
+        return customers.stream().filter(customer -> !Objects.equals(customer.getId(), id)).collect(Collectors.toList());
     }
     @Override
     public void create(Customer customer) {
@@ -75,23 +82,34 @@ public class CustomerServiceImpl implements ICustomerService {
         return customerWithdraw;
     }
 
-    public Customer transfer (Long id, BigDecimal transferAmount, Customer customer) {
-        Customer sender = findById(id);
-        Customer recipient = findById(customer.getTransfer().getRecipient());
+    public void transfer (Transfer transfer) {
+        Customer sender = findById(transfer.getSender().getId());
+        Customer recipient = findById(transfer.getRecipient().getId());
 
         BigDecimal senderBalance = sender.getBalance();
         BigDecimal recipientBalance = recipient.getBalance();
 
-        BigDecimal totalBalance = transferAmount.multiply(customer.getTransfer().getFee()).divide(BigDecimal.valueOf(100)).add(transferAmount);
+        BigDecimal totalBalance = transfer.getTransferAmount().multiply(transfer.getFee()).divide(BigDecimal.valueOf(100)).add(transfer.getTransferAmount());
 
         sender.setBalance(senderBalance.subtract(totalBalance));
-        recipient.setBalance(recipientBalance.add(transferAmount));
+        recipient.setBalance(recipientBalance.add(transfer.getTransferAmount()));
 
-        return customer;
+        // set lại giá trị mới cho Sender và Recipient
+        transfer.setSender(sender);
+        transfer.setRecipient(recipient);
+
+        createHistories(transfer);
+
     }
 
-    public List<Transfer> histories (Transfer transfer) {
-        List<Transfer> histories = new ArrayList<>();
-        histories.add()
+    public List<Transfer> createHistories (Transfer transfer) {
+        transfer.setId(id++);
+        histories.add(transfer);
+
+        return histories;
+    }
+
+    public List<Transfer> showHistories () {
+        return histories;
     }
 }

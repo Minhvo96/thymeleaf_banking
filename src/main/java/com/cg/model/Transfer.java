@@ -4,24 +4,40 @@ import java.math.BigDecimal;
 
 public class Transfer {
     private Long id;
-    private String transferAmount;
+    private BigDecimal transferAmount;
     private BigDecimal total;
     private BigDecimal fee;
-    private Long recipient;
-
+    private Customer sender;
+    private Customer recipient;
     public Transfer(BigDecimal fee) {
         this.fee = fee;
     }
-
     public Transfer() {
     }
 
-    public Transfer(Long id, String transferAmount, BigDecimal total, BigDecimal fee, Long recipient) {
+    public Transfer(Long id, BigDecimal transferAmount, BigDecimal total, BigDecimal fee, Customer sender, Customer recipient) {
+        this.id = id;
+        this.transferAmount = transferAmount;
+        this.total = total;
+        this.fee = fee;
+        this.sender = sender;
+        this.recipient = recipient;
+    }
+
+    public Transfer(Long id, BigDecimal transferAmount, BigDecimal total, BigDecimal fee, Customer recipient) {
         this.id = id;
         this.transferAmount = transferAmount;
         this.total = total;
         this.fee = fee;
         this.recipient = recipient;
+    }
+
+    public Customer getSender() {
+        return sender;
+    }
+
+    public void setSender(Customer sender) {
+        this.sender = sender;
     }
 
     public Long getId() {
@@ -32,11 +48,11 @@ public class Transfer {
         this.id = id;
     }
 
-    public String getTransferAmount() {
+    public BigDecimal getTransferAmount() {
         return transferAmount;
     }
 
-    public void setTransferAmount(String transferAmount) {
+    public void setTransferAmount(BigDecimal transferAmount) {
         this.transferAmount = transferAmount;
     }
 
@@ -56,11 +72,11 @@ public class Transfer {
         this.fee = fee;
     }
 
-    public Long getRecipient() {
+    public Customer getRecipient() {
         return recipient;
     }
 
-    public void setRecipient(Long recipient) {
+    public void setRecipient(Customer recipient) {
         this.recipient = recipient;
     }
 }
