@@ -10,9 +10,17 @@ public class Customer {
     private String phone;
     private String address;
     private BigDecimal balance;
-    private String deposit;
     private String withdraw;
+    private Transfer transfer;
     private Boolean deleted;
+
+    public Transfer getTransfer() {
+        return transfer;
+    }
+
+    public void setTransfer(Transfer transfer) {
+        this.transfer = transfer;
+    }
 
     public String getWithdraw() {
         return withdraw;
@@ -22,35 +30,25 @@ public class Customer {
         this.withdraw = withdraw;
     }
 
-    public Customer(Long id, String fullName, String email, String phone, String address, BigDecimal balance, String deposit, String withdraw, Boolean deleted) {
+    public Customer(Long id, String fullName, String email, String phone, String address, BigDecimal balance, String withdraw, Boolean deleted) {
         this.id = id;
         this.fullName = fullName;
         this.email = email;
         this.phone = phone;
         this.address = address;
         this.balance = balance;
-        this.deposit = deposit;
         this.withdraw = withdraw;
         this.deleted = deleted;
     }
 
-    public Customer(Long id, String fullName, String email, String phone, String address, BigDecimal balance, String deposit, Boolean deleted) {
+    public Customer(Long id, String fullName, String email, String phone, String address, BigDecimal balance, Boolean deleted) {
         this.id = id;
         this.fullName = fullName;
         this.email = email;
         this.phone = phone;
         this.address = address;
         this.balance = balance;
-        this.deposit = deposit;
         this.deleted = deleted;
-    }
-
-    public String getDeposit() {
-        return deposit;
-    }
-
-    public void setDeposit(String deposit) {
-        this.deposit = deposit;
     }
 
     public Customer() {

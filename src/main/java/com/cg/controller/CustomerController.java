@@ -1,6 +1,9 @@
 package com.cg.controller;
 
 import com.cg.model.Customer;
+import com.cg.model.Deposit;
+import com.cg.model.Transfer;
+import com.cg.model.Withdraw;
 import com.cg.service.customer.CustomerServiceImpl;
 import com.cg.service.customer.ICustomerService;
 import org.springframework.stereotype.Controller;
@@ -9,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.awt.color.ICC_ColorSpace;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -17,7 +21,7 @@ public class CustomerController {
 
     private ICustomerService customerService = new CustomerServiceImpl();
 
-    private CustomerServiceImpl customerService2 = new CustomerServiceImpl();
+    private CustomerServiceImpl customerServiceImp = new CustomerServiceImpl();
 
     @GetMapping
     public String showListPage(Model model) {
@@ -71,8 +75,10 @@ public class CustomerController {
     }
 
     @GetMapping("{id}")
-    public String delete(@PathVariable Long id) {
+    public String delete(@PathVariable Long id, Model model) {
         customerService.removeById(id);
+        model.addAttribute("success", true);
+        model.addAttribute("message", "Delete successfully");
         return "customer/list";
     }
 
@@ -83,55 +89,101 @@ public class CustomerController {
         if (customer == null) {
             model.addAttribute("message", "Can't find any customer with that ID");
         } else {
-            model.addAttribute("customer", customer);
+            Deposit deposit = new Deposit();
+            deposit.setCustomer(customer);
+            model.addAttribute("deposit", deposit);
         }
         return "customer/deposit";
     }
 
     @PostMapping("/deposit/{id}")
-    public String deposit(@ModelAttribute Customer customer, Model model, @PathVariable Long id, BigDecimal deposit) {
+    public String deposit(@ModelAttribute Deposit deposit, Model model) {
 
-        if (deposit.compareTo(BigDecimal.ZERO) <= 0) {
-            model.addAttribute("message", "Please input deposit bigger than 0");
-            model.addAttribute("success", false);
-            model.addAttribute("customer", customer);
-        } else {
-            Customer cusDeposit = customerService2.deposit(id, deposit);
-            model.addAttribute("success", true);
-            model.addAttribute("customer", cusDeposit);
-            model.addAttribute("message", "Deposit completed");
-        }
+            if (deposit.getTransactionAmount().compareTo(BigDecimal.ZERO) <= 0) {
+                model.addAttribute("message", "Please input deposit bigger than 0");
+                model.addAttribute("success", false);
+                model.addAttribute("deposit", deposit);
+            } else {
+                customerServiceImp.deposit(deposit);
+                deposit.setTransactionAmount(null);
+                model.addAttribute("success", true);
+                model.addAttribute("message", "Deposit completed");
+            }
+
         return "customer/deposit";
     }
-
     @GetMapping("/withdraw/{id}")
     public String showWithdrawPage(Model model, @PathVariable Long id) {
+
         Customer customer = customerService.findById(id);
 
         if (customer == null) {
-            model.addAttribute("message", "Can't find any customer with that ID");
+            model.addAttribute("messageID", "Can't find any customer with that ID");
+            model.addAttribute("successWithdraw", false);
+            model.addAttribute("customer", new Customer());
         } else {
-            model.addAttribute("customer", customer);
+            Withdraw withdraw = new Withdraw();
+            withdraw.setCustomer(customer);
+            model.addAttribute("withdraw", withdraw);
         }
         return "customer/withdraw";
     }
-
     @PostMapping("/withdraw/{id}")
-    public String withdraw(@ModelAttribute Customer customer, Model model, @PathVariable Long id, BigDecimal withdraw) {
+    public String withdraw(@ModelAttribute Withdraw withdraw, Model model) {
 
-        if (withdraw.compareTo(BigDecimal.ZERO) <= 0 || customer.getBalance().compareTo(withdraw) < 0 ) {
-            model.addAttribute("message", "Please input withdraw bigger than 0");
+        if (withdraw.getTransactionAmount().compareTo(BigDecimal.ZERO) <= 0 || withdraw.getCustomer().getBalance().compareTo(withdraw.getTransactionAmount()) < 0) {
+            model.addAttribute("message", "Please input withdraw bigger than 0 and not lower than current balance");
             model.addAttribute("success", false);
-            model.addAttribute("customer", customer);
+            model.addAttribute("withdraw", withdraw);
         } else {
-            Customer cusDeposit = customerService2.withdraw(id, withdraw);
+            customerServiceImp.withdraw(withdraw);
+            withdraw.setTransactionAmount(null);
+            model.addAttribute("withdraw", withdraw);
             model.addAttribute("success", true);
-            model.addAttribute("customer", cusDeposit);
             model.addAttribute("message", "Withdraw completed");
         }
         return "customer/withdraw";
     }
+    @GetMapping("/transfer/{id}")
+    public String transfer(Model model, @PathVariable Long id) {
+        Customer customer = customerService.findById(id);
+        List<Customer> customerAll = customerService.findAll();
 
+        // tạo một mảng mới để copy các Customer, khi remove sẽ không bị ảnh hưởng tới mảng gốc
+        List<Customer> customerList = new ArrayList<>(customerAll);
+        customerList.remove(customer);
+
+        customer.setTransfer(new Transfer(BigDecimal.valueOf(10L)));
+
+        model.addAttribute("customer", customer);
+        model.addAttribute("customerList", customerList);
+
+        return "/customer/transfer";
+    }
+    @PostMapping("/transfer/{id}")
+    public String transfer(@ModelAttribute Customer customer, Model model, @PathVariable Long id) {
+        Customer customerTransfer = customerService.findById(id);
+        List<Customer> customerAll = customerService.findAll();
+
+        // tạo một mảng mới để copy các Customer, khi remove sẽ không bị ảnh hưởng tới mảng gốc
+        List<Customer> customerList = new ArrayList<>(customerAll);
+        customerList.remove(customerTransfer);
+        model.addAttribute("customerList", customerList);
+
+        customerServiceImp.transfer(id, new BigDecimal(customer.getTransfer().getTransferAmount()), customer);
+        model.addAttribute("success", true);
+        model.addAttribute("message", "Transfer completed");
+        model.addAttribute("customer", customerTransfer);
+
+        return "/customer/transfer";
+    }
+    @GetMapping("/histories")
+    public String transferHistories(Model model) {
+
+
+
+        return "customer/histories";
+    }
 }
 
 
