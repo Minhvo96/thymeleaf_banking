@@ -94,5 +94,15 @@
     </div>
 </div>
 
+<th:block th:if="${success == true}">
+    <footer class="container-fluid success">
+        <div class="container">
+            <div class="notification">
+                <p class="success" th:text="${message}"></p>
+            </div>
+        </div>
+    </footer>
+</th:block>
+
 </body>
 </html>

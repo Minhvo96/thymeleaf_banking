@@ -33,8 +33,7 @@
         <th>Sender Name</th>
         <th>Recipient Name</th>
         <th>Transfer Money ($)</th>
-        <th>Fee ($)</th>
-        <th>Total Transfer Money</th>
+        <th>Transfer Date</th>
       </tr>
       </thead>
       <tbody>
@@ -42,9 +41,8 @@
         <tr>
           <td th:text="${item.sender.fullName}"></td>
           <td th:text="${item.recipient.fullName}"></td>
-          <td th:text="${item.transferAmount}"></td>
-          <td th:text="${item.fee}"></td>
-          <td th:text="${item.total}"></td>
+          <td th:text="${item.transactionAmount}"></td>
+          <td th:text="${#dates.format(item.transactionDate, 'dd-MM-yyyy HH:mm:ss')}"></td>
         </tr>
       </th:block>
       </tbody>
