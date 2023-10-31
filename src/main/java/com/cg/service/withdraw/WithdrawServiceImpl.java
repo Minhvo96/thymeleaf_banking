@@ -4,7 +4,6 @@ import com.cg.model.Withdraw;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class WithdrawServiceImpl implements IWithdrawService {
 
@@ -18,7 +17,7 @@ public class WithdrawServiceImpl implements IWithdrawService {
     }
 
     @Override
-    public Optional<Withdraw> findById(Long aLong) {
+    public Withdraw findById(Long aLong) {
         return null;
     }
 

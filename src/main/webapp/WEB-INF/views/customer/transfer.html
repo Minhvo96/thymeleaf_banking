@@ -9,7 +9,7 @@
   <header>
     <nav class="navbar bg-body-tertiary">
       <div class="container-fluid">
-        <a class="navbar-brand">Transfer</a>
+        <a class="navbar-brand">Deposit</a>
         <div class="d-flex" style="gap: 10px;">
           <a href="/customers">
             <button class="btn btn-outline-light" type="button">
@@ -46,7 +46,7 @@
         <div class="col-lg-3">
           <label class="form-label">Recipient Name</label>
           <select class="form-control" th:field="${transfer.recipient.id}">
-            <option th:each="item : ${recipient}"
+            <option th:each="item : ${customerList}"
                     th:text="${'(' + item.id + ') ' + item.fullName}"
                     th:value="${item.id}">
             </option>

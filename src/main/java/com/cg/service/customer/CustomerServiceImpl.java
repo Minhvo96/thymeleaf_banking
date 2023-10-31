@@ -1,127 +1,115 @@
 package com.cg.service.customer;
-
-import com.cg.model.*;
-import com.cg.model.dto.request.TransferReqDTO;
-import com.cg.model.dto.response.CustomerResDTO;
-import com.cg.repository.*;
-import com.cg.service.withdraw.IWithdrawService;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import com.cg.model.Customer;
+import com.cg.model.Deposit;
+import com.cg.model.Transfer;
+import com.cg.model.Withdraw;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
-@Service
-@AllArgsConstructor
-@Transactional
 public class CustomerServiceImpl implements ICustomerService {
 
-    private final ICustomerRepository customerRepository;
+    private static final List<Customer> customers = new ArrayList<>();
+    private static long id = 1L;
+    private static final List<Transfer> histories = new ArrayList<>();
 
-    private final IDepositRepository depositRepository;
-
-    private final IWithdrawRepository withdrawRepository;
-
-    private final ITransferRepository transferRepository;
-
-    private final IHistoryRepository historyRepository;
-
-    @Override
-    public List<CustomerResDTO> findAllCustomerResDTO() {
-        return customerRepository.findAllCustomerResDTO();
+    static {
+        customers.add(new Customer(id++, "NVA", "nva@co.cc", "2345", "28 Nguyễn Tri Phương", BigDecimal.valueOf(10000), false));
+        customers.add(new Customer(id++, "NVB", "nvb@co.cc", "6789", "27 Nguyễn Tri Phương", BigDecimal.valueOf(20000), false));
     }
 
     @Override
     public List<Customer> findAll() {
-        return customerRepository.findAll();
+        return customers;
     }
 
     @Override
-    public Optional<Customer> findById(Long id) {
-        return customerRepository.findById(id);
+    public Customer findById(Long id) {
+        List<Customer> customersList = findAll();
+        for(int i = 0; i < customersList.size(); i++) {
+            if (id == customersList.get(i).getId()) {
+                return customersList.get(i);
+            }
+        }
+        return null;
     }
 
+    public List<Customer> findAllWithoutId(Long id) {
+        return customers.stream().filter(customer -> !Objects.equals(customer.getId(), id)).collect(Collectors.toList());
+    }
     @Override
     public void create(Customer customer) {
+        customer.setId(id++);
         customer.setBalance(BigDecimal.ZERO);
-        customerRepository.save(customer);
+        customers.add(customer);
     }
-
     @Override
     public void update(Long id, Customer customer) {
-        Customer oldCustomer = findById(customer.getId()).get();
-        customer.setBalance(oldCustomer.getBalance());
-        customer.setDeleted(oldCustomer.getDeleted());
-        customerRepository.save(customer);
+        int index = customers.indexOf(findById(id));
+        Customer customer1 = findById(id);
+        customer.setBalance(customer1.getBalance());
+        customers.set(index, customer);
     }
-
     @Override
     public void removeById(Long id) {
-        customerRepository.deleteById(id);
+        customers.remove(findById(id));
     }
 
-    @Override
-    public void deposit(Deposit deposit) {
-        depositRepository.save(deposit);
+    public Customer deposit (Deposit deposit) {
+        Customer customerDeposit = findById(deposit.getCustomer().getId());
+        BigDecimal currentBalance = customerDeposit.getBalance();
+        BigDecimal newDeposit = currentBalance.add(deposit.getTransactionAmount());
 
-        Long customerId = deposit.getCustomer().getId();
-        BigDecimal transactionAmount = deposit.getTransactionAmount();
+        customerDeposit.setBalance(newDeposit);
 
-        customerRepository.incrementBalance(customerId, transactionAmount);
+        deposit.setCustomer(customerDeposit);
+
+        return customerDeposit;
     }
 
-    @Override
-    public void withdraw(Withdraw withdraw) {
-        withdrawRepository.save(withdraw);
+    public Customer withdraw (Withdraw withdraw) {
+        Customer customerWithdraw = findById(withdraw.getCustomer().getId());
+        BigDecimal currentBalance = customerWithdraw.getBalance();
+        BigDecimal newWithdraw = currentBalance.subtract(withdraw.getTransactionAmount());
 
-        Long customerId = withdraw.getCustomer().getId();
-        BigDecimal transactionAmount = withdraw.getTransactionAmount();
+        customerWithdraw.setBalance(newWithdraw);
 
-        customerRepository.decrementBalance(customerId, transactionAmount);
+        withdraw.setCustomer(customerWithdraw);
+
+        return customerWithdraw;
     }
 
-    @Override
-    public void transfer(Transfer transfer) {
+    public void transfer (Transfer transfer) {
+        Customer sender = findById(transfer.getSender().getId());
+        Customer recipient = findById(transfer.getRecipient().getId());
 
-        Long senderId = transfer.getSender().getId();
-        Long recipientId = transfer.getRecipient().getId();
+        BigDecimal senderBalance = sender.getBalance();
+        BigDecimal recipientBalance = recipient.getBalance();
 
-        BigDecimal transferAmount = transfer.getTransferAmount();
         BigDecimal totalBalance = transfer.getTransferAmount().multiply(transfer.getFee()).divide(BigDecimal.valueOf(100)).add(transfer.getTransferAmount());
 
-        customerRepository.decrementBalance(senderId, totalBalance);
-        customerRepository.incrementBalance(recipientId, transferAmount);
+        sender.setBalance(senderBalance.subtract(totalBalance));
+        recipient.setBalance(recipientBalance.add(transfer.getTransferAmount()));
 
-        transferRepository.save(transfer);
+        // set lại giá trị mới cho Sender và Recipient
+        transfer.setSender(sender);
+        transfer.setRecipient(recipient);
 
         createHistories(transfer);
 
     }
 
-    public void createHistories(Transfer transfer) {
-        History history = new History();
+    public List<Transfer> createHistories (Transfer transfer) {
+        transfer.setId(id++);
+        histories.add(transfer);
 
-        history.setSender(transfer.getSender());
-        history.setRecipient(transfer.getRecipient());
-        history.setTransactionAmount(transfer.getTransferAmount());
-        history.setTransactionDate(new Date());
-
-        historyRepository.save(history);
+        return histories;
     }
 
-    @Override
-    public List<History> findAllHistory() {
-        return historyRepository.findAll();
+    public List<Transfer> showHistories () {
+        return histories;
     }
-
-
-    @Override
-    public List<Customer> findAllWithoutId(Long id) {
-        List<Customer> customers = customerRepository.findAllByDeleted(false);
-        return customers.stream().filter(customer -> !customer.getId().equals(id)).collect(Collectors.toList());
-    }
-
 }

@@ -4,7 +4,6 @@ import com.cg.model.Deposit;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class DepositServiceImpl implements IDepositService {
 
@@ -17,7 +16,7 @@ public class DepositServiceImpl implements IDepositService {
     }
 
     @Override
-    public Optional<Deposit> findById(Long aLong) {
+    public Deposit findById(Long aLong) {
         return null;
     }
 
